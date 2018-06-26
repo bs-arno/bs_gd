@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#-*- coding:UTF-8 -*-
+# -*- coding:UTF-8 -*-
 import logging
 import sys
 import requests
@@ -206,7 +206,8 @@ class Client(object):
         save = list()
         deleted = 0
         for record in records:
-            if (record_type == str(record['type']) or record_type is None) and name == str(record['name']) and (data == str(record['data']) or data is None):
+            if (record_type == str(record['type']) or record_type is None) and name == str(record['name']) and (
+                    data == str(record['data']) or data is None):
                 deleted += 1
             else:
                 save.append(record)
@@ -240,12 +241,12 @@ class Client(object):
             _rec.update(data)
             self.update_record(domain, _rec)
         return True
-        
+
+
 class BadResponse(Exception):
     def __init__(self, message, *args, **kwargs):
         self._message = message
         super(BadResponse, *args, **kwargs)
 
     def __str__(self, *args, **kwargs):
-
         return 'Response Data: {}'.format(self._message)

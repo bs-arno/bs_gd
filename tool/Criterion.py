@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import Operator
+from tool import Operator
+
 
 class Criterion:
     def __init__(self, field, operator, value):
