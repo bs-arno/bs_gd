@@ -158,22 +158,6 @@ class Client(object):
         return True
 
     def update_ip(self, ip, record_type='A', domains=None, subdomains=None):
-        """Update the IP address in all records, specified by type, to the value of ip.  Returns True if no
-        exceptions occurred during the update.  If no domains are provided, all domains returned from
-        self.get_domains() will be updated.  By default, only A records are updated.
-
-        :param record_type: The type of records to update (eg. 'A')
-        :param ip: The new IP address (eg. '123.1.2.255')
-        :param domains: A list of the domains you want to update (eg. ['123.com','abc.net'])
-        :param subdomains: A list of the subdomains you want to update (eg. ['www','dev'])
-
-        :type record_type: str
-        :type ip: str
-        :type domains: str, list of str
-        :type subdomains: str, list of str
-        :return: True if no exceptions occurred
-        """
-
         if domains is None:
             domains = self.get_domains()
         elif sys.version_info < (3, 0):
@@ -226,15 +210,6 @@ class Client(object):
         return True
 
     def update_record_ip(self, ip, domain, name, record_type):
-        """
-        更新域名
-        :param ip: the new IP for the DNS record (ex. '123.1.2.255')
-        :param domain: the domain where the DNS belongs to (ex. 'example.com')
-        :param name: the DNS record name to be updated (ex. 'dynamic')
-        :param record_type: Record type (ex. 'CNAME', 'A'...)
-
-        :return: True if no exceptions occurred
-        """
         records = self.get_records(domain, name=name, record_type=record_type)
         data = {'data': str(ip)}
         for _rec in records:

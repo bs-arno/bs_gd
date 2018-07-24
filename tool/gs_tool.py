@@ -3,12 +3,12 @@ import json
 import codecs
 import datetime
 import traceback
-from tool import client, account
-from tool.Criterion import Criterion
+from tool.gd import client, account
 from tool.Operator import Operator
 import cx_Oracle
+from tool.cf.Account import Account
 
-jsonpath = '/usr/local/lib/python2.7/site-packages/flask/GD/gs_conf.json'
+JSON_PATH = '/usr/local/lib/python2.7/site-packages/flask/GD/gs_conf.json'
 
 
 def get(table, id):
@@ -339,11 +339,6 @@ def _in(value):
     return in_str[:-1] + ")"
 
 
-def judgment_json(jsonpath):  # 读取json文件
-    with codecs.open(jsonpath, 'r', encoding='utf-8') as j:
-        return json.load(j)
-
-
 def _get_conn():
     """
     获取数据库连接
@@ -389,23 +384,24 @@ def get_next_seq_no(seq_name):
 
 
 def writejson(dictwrite):
-    with codecs.open(jsonpath, 'w') as w:  # 写入json文件
+    with codecs.open(JSON_PATH, 'w') as w:  # 写入json文件
         json.dump(dictwrite, w, indent=4)
 
 
 def judgment_json():  # 读取json文件
-    with codecs.open(jsonpath, 'r') as j:
+    with codecs.open(JSON_PATH, 'r') as j:
         return json.load(j)
 
 
-def update_account(manage):
+def update_account(useraccount):
     gs_conf = judgment_json()
-    if manage in gs_conf['account'].keys():
-        userAccount = account.Account(gs_conf["account"][manage]['api_key'], gs_conf["account"][manage]['api_secret'])
-        userClient = client.Client(userAccount)
-        gs_conf['account'][manage]['domain'] = userClient.get_domains()
+    if useraccount in gs_conf['account'].keys():
+        userClient = get_user_client(useraccount)
+        if gs_conf["account"][useraccount]['manage'] == 'gd':
+            gs_conf['account'][useraccount]['domain'] = userClient.get_domains()
+        elif gs_conf["account"][useraccount]['manage'] == 'cf':
+            gs_conf['account'][useraccount]['domain'] = userClient.get_all_domains()
         writejson(gs_conf)
-        return True
 
 
 def add_account(manage, key, secret):
@@ -416,27 +412,36 @@ def add_account(manage, key, secret):
 
 
 def get_domain_account(domain):
+    """
+    根据域名获取账号
+    """
     gs_conf = judgment_json()
-    manage = ''
-    for account in gs_conf['account']:
+    for useraccount in gs_conf['account']:
         if domain in gs_conf['account'][account]['domain']:
-            manage = account
-    return manage
+            return useraccount
 
 
-def get_user_client(manage):
+def get_user_client(useraccount):
+    """
+    创建连接对象
+    """
     gs_conf = judgment_json()
-    if manage in gs_conf['account'].keys():
-        userAccount = account.Account(gs_conf["account"][manage]['api_key'], gs_conf["account"][manage]['api_secret'])
-        return client.Client(userAccount)
+    if useraccount in gs_conf['account'].keys():
+        if gs_conf["account"][useraccount]['manage'] == 'gd':
+            return client.Client(account.Account(gs_conf["account"][useraccount]['api_key'], gs_conf["account"][useraccount]['api_secret']))
+        elif gs_conf["account"][useraccount]['manage'] == 'cf':
+            return Account(gs_conf["account"][useraccount]['email'], gs_conf["account"][useraccount]['token'])
     else:
         return 'Account not exist'
 
 
-def get_account_domain(manage):
+def get_account_domain(useraccount):
+    """
+    获取账号下的所有域名
+    """
     gs_conf = judgment_json()
-    if manage in gs_conf['account'].keys():
-        return gs_conf['account'][manage]['domain']
+    if useraccount in gs_conf['account'].keys():
+        return gs_conf['account'][useraccount]['domain']
     else:
         return 'Account not exist'
 
